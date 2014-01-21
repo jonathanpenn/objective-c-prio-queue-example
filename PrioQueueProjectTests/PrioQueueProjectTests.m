@@ -7,6 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
+#import "PrioQueueProject.h"
 
 @interface PrioQueueProjectTests : XCTestCase
 
@@ -26,9 +27,52 @@
     [super tearDown];
 }
 
-- (void)testExample
+- (void)testCreateQueue
 {
-    XCTFail(@"No implementation for \"%s\"", __PRETTY_FUNCTION__);
+    PrioQueueProject *queue = [PrioQueueProject queue];
+    XCTAssertNotNil(queue, @"I should at least init");
 }
+
+
+- (void) testQueueCounts
+{
+    PrioQueueProject *queue = [PrioQueueProject queue];
+    XCTAssert(queue.count == 0, @"Count is zero");
+    
+    [queue push:@"First" withPriority:10];
+    XCTAssert(queue.count == 1, @"Count is one");
+    
+    [queue push:@"Firstish" withPriority:10];
+    [queue push:@"Second" withPriority:11];
+    [queue push:@"Third" withPriority:12];
+    XCTAssert(queue.count == 4, @"Count is four");
+}
+
+- (void) testPriority
+{
+    PrioQueueProject *queue = [PrioQueueProject queue];
+    [queue push:@1 withPriority:1];
+    [queue push:@3 withPriority:3];
+    [queue push:@2 withPriority:2];
+    [queue push:@4 withPriority:4];
+    
+    XCTAssertEqualObjects(@4, [queue front], @"4 is the highest priority");
+}
+
+- (void) testPop
+{
+    PrioQueueProject *queue = [PrioQueueProject queue];
+    [queue push:@1 withPriority:1];
+    [queue push:@3 withPriority:3];
+    [queue push:@2 withPriority:2];
+    [queue push:@4 withPriority:4];
+    
+    XCTAssertEqualObjects(@4, [queue pop], @"4 is the highest priority");
+    XCTAssertEqualObjects(@3, [queue pop], @"now 3 is the highest priority");
+    XCTAssertEqualObjects(@2, [queue pop], @"now 2 is the highest priority");
+    XCTAssertEqualObjects(@1, [queue pop], @"now 1 is the highest priority");
+    XCTAssertNil([queue pop], @"There is nothing left");
+}
+
 
 @end
