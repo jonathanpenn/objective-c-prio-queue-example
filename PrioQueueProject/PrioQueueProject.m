@@ -12,6 +12,7 @@
 @property (strong, nonatomic) NSManagedObjectModel *privateModel;
 @property (strong, nonatomic) NSFetchRequest *fetch;
 @property (strong, nonatomic) NSArray *fetchCache;
+@property (nonatomic) NSUInteger countCache;
 - (void) setupFetchRequest;
 - (void) updateCache;
 @end
@@ -36,6 +37,7 @@ static NSString *PQP_OBJECT_KEY = @"target";
     self.fetch = [NSFetchRequest fetchRequestWithEntityName:NSStringFromClass([self class])];
     NSSortDescriptor *sortDesc = [NSSortDescriptor sortDescriptorWithKey:PQP_PRIO_KEY
                                                                ascending:NO];
+    self.fetch.fetchLimit = 1;
 
     self.fetch.sortDescriptors = @[ sortDesc ];
 }
@@ -44,6 +46,12 @@ static NSString *PQP_OBJECT_KEY = @"target";
     NSManagedObjectContext *ctx = [self managedObjectContext];
     NSError *error = nil;
     self.fetchCache = [ctx executeFetchRequest:self.fetch error:&error];
+    assert(error == nil);
+
+    NSString *entity = NSStringFromClass([self class]);
+    NSFetchRequest *_count = [NSFetchRequest fetchRequestWithEntityName:entity];
+    _count.resultType = NSCountResultType;
+    self.countCache = [ctx countForFetchRequest:_count error:&error];
     assert(error == nil);
 }
 
@@ -106,7 +114,7 @@ static NSString *PQP_OBJECT_KEY = @"target";
 }
 
 - (NSUInteger)  count {
-    return [self.fetchCache count];
+    return self.countCache;
 }
 
 @end
