@@ -14,7 +14,7 @@
 @property (strong, nonatomic) NSArray *fetchCache;
 @property (nonatomic) NSUInteger countCache;
 - (void) setupFetchRequest;
-- (void) updateCache;
+- (void) updateCacheInContext:(NSManagedObjectContext *) context;
 @end
 
 static NSString *PQP_PRIO_KEY = @"priority";
@@ -42,16 +42,15 @@ static NSString *PQP_OBJECT_KEY = @"target";
     self.fetch.sortDescriptors = @[ sortDesc ];
 }
 
-- (void) updateCache {
-    NSManagedObjectContext *ctx = [self managedObjectContext];
+- (void) updateCacheInContext:(NSManagedObjectContext *)context {
     NSError *error = nil;
-    self.fetchCache = [ctx executeFetchRequest:self.fetch error:&error];
+    self.fetchCache = [context executeFetchRequest:self.fetch error:&error];
     assert(error == nil);
 
     NSString *entity = NSStringFromClass([self class]);
     NSFetchRequest *_count = [NSFetchRequest fetchRequestWithEntityName:entity];
     _count.resultType = NSCountResultType;
-    self.countCache = [ctx countForFetchRequest:_count error:&error];
+    self.countCache = [context countForFetchRequest:_count error:&error];
     assert(error == nil);
 }
 
@@ -66,26 +65,31 @@ static NSString *PQP_OBJECT_KEY = @"target";
         NSManagedObject *obj = [self.fetchCache firstObject];
         retval = [obj valueForKey:PQP_OBJECT_KEY];
         NSManagedObjectContext *ctx = [self managedObjectContext];
-        [ctx deleteObject:obj];
-        NSError *error = nil;
-        [ctx save:&error];
-        assert(error == nil);
-        [self updateCache];
+        [ctx performBlockAndWait:^{
+            [[self managedObjectContext] deleteObject:obj];
+            NSError *error = nil;
+            [[self managedObjectContext] save:&error];
+            assert(error == nil);
+            [self updateCacheInContext:ctx];
+        }];
     }
     return retval;
 }
 
 - (void) push:(id<NSCoding>)obj withPriority:(NSUInteger)prio {
     NSManagedObjectContext *ctx = [self managedObjectContext];
-    NSString *entity_name = NSStringFromClass([self class]);
-    NSManagedObject *toinsert = [NSEntityDescription insertNewObjectForEntityForName:entity_name
+    [ctx performBlockAndWait:^{
+
+        NSString *entity_name = NSStringFromClass([self class]);
+        NSManagedObject *toinsert = [NSEntityDescription insertNewObjectForEntityForName:entity_name
                                                               inManagedObjectContext:ctx];
-    [toinsert setValue:@(prio) forKey:PQP_PRIO_KEY];
-    [toinsert setValue:obj forKey:PQP_OBJECT_KEY];
-    NSError *error = nil;
-    [ctx save:&error];
-    [self updateCache];
-    assert(error == nil);
+        [toinsert setValue:@(prio) forKey:PQP_PRIO_KEY];
+        [toinsert setValue:obj forKey:PQP_OBJECT_KEY];
+        NSError *error = nil;
+        [ctx save:&error];
+        assert(error == nil);
+        [self updateCacheInContext:ctx];
+    }];
 }
 
 - (NSString *) persistentStoreTypeForFileType:(NSString *)fileType {
