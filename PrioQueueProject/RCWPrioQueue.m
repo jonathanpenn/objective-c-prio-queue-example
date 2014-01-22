@@ -54,4 +54,16 @@ CFBinaryHeapCallBacks callbacks = { 0, NULL, NULL, NULL, compare };
     CFBinaryHeapAddValue(binHeap, CFBridgingRetain(obj));
 }
 
+- (id) nextObject {
+    return [self pop];
+}
+
+- (NSArray *) allObjects {
+    NSMutableArray *retval = [NSMutableArray array];
+    for (int i=0; i < [self count]; i++) {
+        [retval addObject:[self pop]];
+    }
+    return retval;
+}
+
 @end

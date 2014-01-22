@@ -147,5 +147,25 @@
     
 }
 
+- (void) testEnumeration
+{
+    RCWPrioQueue *queue = [[RCWPrioQueue alloc] init];
+
+    for (int i = 0;i < 10000; i++) {
+        u_int32_t randval = arc4random_uniform(400);
+        ForTestClass *toinsert = [[ForTestClass alloc] init];
+        toinsert.actual = [NSString stringWithFormat:@"%d",randval];
+        [queue push:toinsert];
+    }
+    NSLog(@"Start at %@",[NSDate date]);
+    for (ForTestClass *c in queue) {
+        if ([c.actual integerValue] == 200) {
+            NSLog(@"%@",c);
+        }
+    }
+    NSLog(@"Done at %@",[NSDate date]);
+
+}
+
 
 @end
