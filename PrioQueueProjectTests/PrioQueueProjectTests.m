@@ -78,7 +78,7 @@
 {
     PrioQueueProject *queue = [PrioQueueProject queue];
     NSLog(@"Start at %@",[NSDate date]);
-    for (int i = 0;i < 10000; i++) {
+    for (int i = 0;i < 100; i++) {
         u_int32_t prio = arc4random_uniform(10000);
         u_int32_t randval = arc4random_uniform(400);
         [queue push:@(randval) withPriority:prio];

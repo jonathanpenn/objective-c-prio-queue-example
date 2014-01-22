@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		40851669188F72A700D9B4B5 /* RCWPrioQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 40851668188F72A700D9B4B5 /* RCWPrioQueue.m */; };
+		4085166B188F792F00D9B4B5 /* RCWPrioQueueTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4085166A188F792F00D9B4B5 /* RCWPrioQueueTests.m */; };
 		4093A120188E1515001D424A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4093A11F188E1515001D424A /* Foundation.framework */; };
 		4093A125188E1515001D424A /* PrioQueueProject.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4093A124188E1515001D424A /* PrioQueueProject.h */; };
 		4093A127188E1515001D424A /* PrioQueueProject.m in Sources */ = {isa = PBXBuildFile; fileRef = 4093A126188E1515001D424A /* PrioQueueProject.m */; };
@@ -43,6 +45,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		40851667188F72A700D9B4B5 /* RCWPrioQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCWPrioQueue.h; sourceTree = "<group>"; };
+		40851668188F72A700D9B4B5 /* RCWPrioQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCWPrioQueue.m; sourceTree = "<group>"; };
+		4085166A188F792F00D9B4B5 /* RCWPrioQueueTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RCWPrioQueueTests.m; path = ../RCWPrioQueueTests.m; sourceTree = "<group>"; };
 		4093A11C188E1515001D424A /* libPrioQueueProject.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPrioQueueProject.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		4093A11F188E1515001D424A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		4093A123188E1515001D424A /* PrioQueueProject-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "PrioQueueProject-Prefix.pch"; sourceTree = "<group>"; };
@@ -118,6 +123,8 @@
 				4093A122188E1515001D424A /* Supporting Files */,
 				4093A147188E2554001D424A /* MySubClass.h */,
 				4093A148188E2554001D424A /* MySubClass.m */,
+				40851667188F72A700D9B4B5 /* RCWPrioQueue.h */,
+				40851668188F72A700D9B4B5 /* RCWPrioQueue.m */,
 			);
 			path = PrioQueueProject;
 			sourceTree = "<group>";
@@ -133,6 +140,7 @@
 		4093A135188E1515001D424A /* PrioQueueProjectTests */ = {
 			isa = PBXGroup;
 			children = (
+				4085166A188F792F00D9B4B5 /* RCWPrioQueueTests.m */,
 				4093A13B188E1515001D424A /* PrioQueueProjectTests.m */,
 				4093A136188E1515001D424A /* Supporting Files */,
 			);
@@ -231,6 +239,7 @@
 			files = (
 				4093A127188E1515001D424A /* PrioQueueProject.m in Sources */,
 				4093A149188E2554001D424A /* MySubClass.m in Sources */,
+				40851669188F72A700D9B4B5 /* RCWPrioQueue.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -238,6 +247,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4085166B188F792F00D9B4B5 /* RCWPrioQueueTests.m in Sources */,
 				4093A13C188E1515001D424A /* PrioQueueProjectTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -415,6 +425,7 @@
 				4093A141188E1515001D424A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		4093A142188E1515001D424A /* Build configuration list for PBXNativeTarget "PrioQueueProjectTests" */ = {
 			isa = XCConfigurationList;
@@ -423,6 +434,7 @@
 				4093A144188E1515001D424A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
