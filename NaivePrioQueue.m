@@ -11,7 +11,6 @@
 @interface NaivePrioQueue ()
 @property (strong, nonatomic) NSComparator comparator;
 @property (strong, nonatomic) NSMutableArray *datastore;
-@property (strong, nonatomic) NSArray *sorted;
 @end
 
 @implementation NaivePrioQueue
@@ -27,29 +26,29 @@
 
 - (void) push:(id)obj {
     [self.datastore addObject:obj];
-    self.sorted = [self.datastore sortedArrayUsingComparator:self.comparator];
+    [self.datastore sortUsingComparator:self.comparator];
 }
 
 - (id) pop
 {
-    id first = [self.sorted firstObject];
+    id first = [self.datastore firstObject];
     [self.datastore removeObject:first];
-    self.sorted = [self.datastore sortedArrayUsingComparator:self.comparator];
+    [self.datastore sortUsingComparator:self.comparator];
     return first;
 }
 
 - (id) front
 {
-    return [self.sorted firstObject];
+    return [self.datastore firstObject];
 }
 
 - (NSUInteger) count
 {
-    return [self.sorted count];
+    return [self.datastore count];
 }
 
 - (NSArray *) allObjects {
-    return self.sorted;
+    return self.datastore;
 }
 
 - (id) nextObject
