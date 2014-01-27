@@ -15,9 +15,7 @@
 
 @end
 
-@interface RCWPrioQueue : NSEnumerator {
-    CFBinaryHeapRef binHeap;
-}
+@interface RCWPrioQueue : NSEnumerator
 
 - (NSUInteger) count;
 - (void) push:(id<RCWPrioCanCompare>) obj;

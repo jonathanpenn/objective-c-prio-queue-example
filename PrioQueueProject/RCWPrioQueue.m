@@ -14,28 +14,29 @@ CFComparisonResult compare(const void *lefthandside, const void *righthandside, 
     return [left compareWith:right];
 }
 
-CFBinaryHeapCallBacks callbacks = { 0, NULL, NULL, NULL, compare };
+CFBinaryHeapCallBacks defaultCallbacks = { 0, NULL, NULL, NULL, compare };
 
 @interface RCWPrioQueue ()
+@property (assign, nonatomic) CFBinaryHeapRef binHeap;
 @end
 
 @implementation RCWPrioQueue
 
 - (instancetype) init {
     if (self = [super init]) {
-        binHeap = CFBinaryHeapCreate(kCFAllocatorDefault, 0, &callbacks, NULL);
+        self.binHeap = CFBinaryHeapCreate(kCFAllocatorDefault, 0, &defaultCallbacks, NULL);
     }
     return self;
 }
 
 - (NSUInteger) count {
-    return CFBinaryHeapGetCount(binHeap);
+    return CFBinaryHeapGetCount(self.binHeap);
 }
 
 - (id) front {
     CFTypeRef retRef = NULL;
     id retObj = nil;
-    BOOL ok = CFBinaryHeapGetMinimumIfPresent(binHeap, &retRef);
+    BOOL ok = CFBinaryHeapGetMinimumIfPresent(self.binHeap, &retRef);
     if (ok) {
         retObj = CFBridgingRelease(retRef);
     }
@@ -45,13 +46,13 @@ CFBinaryHeapCallBacks callbacks = { 0, NULL, NULL, NULL, compare };
 - (id) pop {
     id retObj = [self front];
     if (retObj) {
-        CFBinaryHeapRemoveMinimumValue(binHeap);
+        CFBinaryHeapRemoveMinimumValue(self.binHeap);
     }
     return retObj;
 }
 
 - (void) push:(id<RCWPrioCanCompare>)obj {
-    CFBinaryHeapAddValue(binHeap, CFBridgingRetain(obj));
+    CFBinaryHeapAddValue(self.binHeap, CFBridgingRetain(obj));
 }
 
 - (id) nextObject {
