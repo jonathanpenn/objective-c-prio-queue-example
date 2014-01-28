@@ -29,15 +29,131 @@ element.
     @end
 
 
-It's not a lot of code, and it works.  The code is testable and clean.  So, you show it to your boss and she says it's ok,  but maybe it would be better to implement it using a CFBinaryHeap.    You had no idea such a thing existed.  A quick glance at NSHipster reveals that it does exists AND you can implement a priority queue in it.  So you do.  
+It's not a lot of code, and it works. The code is testable and clean.
+So, you show it to your boss and she says it's ok, but maybe it would
+be better to implement it using a CFBinaryHeap. You had no idea such a
+thing existed. A quick glance at NSHipster reveals that it does exists
+AND you can implement a priority queue in it. So you do.
 
-[ insert code]
+The first thign you set up is a protocol for objects you add to this prio queue
+to manage the comparators.
 
-This version is pretty awesome you think.  It's faster and cleaner than the first version.  You proudly show it to the tech lead and she sighs.  You know this is a bad sign.  The problem is, she tells you,  the project has a requirement that queue be persistent.  Meaning the queue has to be stored in a such a way as to be recovered if the phone is rebooted,  or the app is killed, or something else.  You stop and check your shirt to see if it's red and then continue because this seems impossible.  Serializing can be done with the array, sure, but only if it's smaller than memory.  Serializing a CFBinaryHeap sounds pretty hard.  So What to do?  The tech lead nods her head toward an office you know you should not approach.  Facing the door like some sort of voodoo skull is the partially disassembled corpse of something called a MicroVAX.  You shudder and approach Sharon's office.  Her gray hair and persistent use of something called Emacs has made her the terror of the intern pool.  
+    @protocol RCWPrioCanCompare <NSObject>
+    - (CFComparisonResult) compareWith:(id<RCWPrioCanCompare>) otherObj;
+    - (NSString *) comparisonValue;
+    @end
 
-You knock gently and she turns and stares as you as you stammer out the requirements.  She leans back for a minute, clearly thinking, and then says "Use Core Data.  A UIManagedDocument subclass can encapsulate it all for you."
-And then she turns back to her terminal and you are dismissed.  
 
-You go back to you desk and start typing again,  this time entering a new part of Cocoa Development and wondering just how far down this rabbit hole can go.
+Then the interface looks like this:
 
-The thing to remember is that Core Data isn't just some fancy-pants ORM.  It's really a data structure service that provides the ability to persist when you need it.  You don't have to persist anything,  and if you use the in-memory store you can't really persist anything.    Since you don't have an existing model to work with you can just create one in code.  You don't even have to manage the Core Data Stack because the UIManagedDocument class does that for you. 
+    @interface RCWPrioQueue : NSEnumerator
+    - (NSUInteger) count;
+    - (void) push:(id<RCWPrioCanCompare>) obj;
+    - (id) pop;
+    - (id) front;
+    @end
+
+and 
+
+This class inherits from NSEnumetor so that you can use simply
+implment a couple of methods and it supports enumeration. This version
+is pretty awesome you think. It's faster and cleaner than the first
+version. You proudly show it to the tech lead and she sighs. You know
+this is a bad sign. The problem is, she tells you, the project has a
+requirement that queue be persistent. Meaning the queue has to be
+stored in a such a way as to be recovered if the phone is rebooted, or
+the app is killed, or something else. You stop and check your shirt to
+see if it's red and then continue because this seems impossible.
+Serializing can be done with the array, sure, but only if it's smaller
+than memory. Serializing a CFBinaryHeap sounds pretty hard. So What to
+do? The tech lead nods her head toward an office you know you should
+not approach. Facing the door like some sort of voodoo skull is the
+partially disassembled corpse of something called a MicroVAX. You
+shudder and approach Sharon's office. Her gray hair and persistent use
+of something called Emacs has made her the terror of the intern pool.
+
+You knock gently and she turns and stares as you as you stammer out
+the requirements. She leans back for a minute, clearly thinking, and
+then says "Use Core Data. A UIManagedDocument subclass can encapsulate
+it all for you." And then she turns back to her terminal and you are
+dismissed.
+
+You go back to you desk and start typing again, this time entering a
+new part of Cocoa Development and wondering just how far down this
+rabbit hole can go.
+
+You can use the `@import` syntax to pull Core Data into your project with one line.  
+
+    @import CoreData;    
+
+Then the interface looks like this:
+
+    @interface PrioQueueProject : UIManagedDocument
+
+    + (instancetype) queue;
+    + (NSURL *) fileURL;
+    - (NSUInteger) count;
+    - (id) front;
+    - (id) pop;
+    - (void) push:(id<NSCoding>) obj withPriority:(NSUInteger) prio;
+    @end
+
+A big change is the `fileURL` and `queue` class methods. The `queue`
+class is an alloc/init combo similar to the `array` method on
+`NSArray`. The `fileURL` is how you can change the location of the
+persistant store in subclasses. Because this is a base class and we're
+not assuming that a model exists the class creates a model in code.
+The model is pretty simple. It includes a single entity that has two
+attributes. The priority attribute is used for ordering, and the
+target attribute is a serialized verion (via NSCoding) of the object
+in the queue.
+
+    - (NSManagedObjectModel *) managedObjectModel {
+        if (self.privateModel == nil) {
+            NSManagedObjectModel *model = [[NSManagedObjectModel alloc] init];
+            NSEntityDescription *entity = [[NSEntityDescription alloc] init];
+            entity.name = NSStringFromClass([self class]);
+            
+            NSAttributeDescription *prio_attr = [[NSAttributeDescription alloc] init];
+            prio_attr.name = PQP_PRIO_KEY;
+            prio_attr.attributeType = NSInteger64AttributeType;
+            
+            NSAttributeDescription *target_attr = [[NSAttributeDescription alloc] init];
+            target_attr.name = PQP_OBJECT_KEY;
+            target_attr.attributeType = NSTransformableAttributeType;
+            
+            entity.properties = @[ prio_attr, target_attr];
+            [model setEntities:@[entity]];
+            self.privateModel = model;
+        }
+        return self.privateModel;
+    }
+
+All of the hard work happens in using the fetch request.  
+
+    - (void) setupFetchRequest {
+        self.fetch = [NSFetchRequest fetchRequestWithEntityName:NSStringFromClass([self class])];
+        NSSortDescriptor *sortDesc = [NSSortDescriptor sortDescriptorWithKey:PQP_PRIO_KEY
+                                                               ascending:NO];
+        self.fetch.fetchLimit = 1;
+
+        self.fetch.sortDescriptors = @[ sortDesc ];
+    }
+
+Because we only care about the first element, we can set the
+`fetchLimit` to 1. This fetch request is fired every time an element
+is added or removed from the queue, and the result of the fetch
+request is cached for use in the `front` methods. The power of Core
+Data as Data Structure service saves the day.
+
+## Epilogue
+
+The thing to remember is that Core Data isn't just some fancy-pants
+ORM. It's really a data structure service that provides the ability to
+persist when you need it. You don't have to persist anything, and if
+you use the in-memory store you can't really persist anything. Since
+you don't have an existing model to work with you can just create one
+in code. You don't even have to manage the Core Data Stack because the
+UIManagedDocument class does that for you.
+
+The full code can be found at https://github.com/kognate/objective-c-prio-queue-example
